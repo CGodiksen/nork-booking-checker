@@ -9,16 +9,43 @@ class BookingScraper:
         # The main url for the booking site used to find the url for each individual fitness room booking site.
         self.booking_url = "http://nork.dk/booking/"
 
+        self.__get_individual_booking_urls()
+
+        self.__extract_bookings("https://www.conventus.dk/dataudv/www/booking.php?idv1=1&idv2=06:00&idv3=23:30&idv4=201"
+                                "21&idv5=10126&d=20&m=09&y=20&navn=skjul&ressourceliste=skjul&banebooking=skjul&login_"
+                                "boks=vis&handelsbetingelser=vis&engine_error=&alt_farver=skjul")
+
     def get_bookings(self):
         """
         Scrapes two weeks of data from each of the four booking sites for the fitness room and updates the bookings.
         """
 
-    def get_individual_booking_urls(self):
+    def __get_individual_booking_urls(self):
         """
         Scrapes the main booking url to find the individual fitness room booking sites. Two URLs are returned for each
         of the four fitness room booking sites to account for the current week and next week.
         """
+        urls = []
+
+        request = requests.get(self.booking_url)
+        html = request.text
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        # Finding the URL for the current and next week for each of the four sites.
+        for i in range(1, 5):
+            current_week = soup.find("a", text=re.compile("Fitness " + str(i)))["href"]
+
+            current_week_html = requests.get(current_week).text
+            current_week_soup = BeautifulSoup(current_week_html, "html.parser")
+
+            # Finding the week so it can be used to find the "Next week" link.
+            week = current_week_soup.find("span", class_="bt", text=re.compile("Uge")).contents[0][7:9]
+
+            next_week = current_week_soup.find("a", attrs={"title": "Næste uge - " + week})["href"]
+
+            urls.append(current_week)
+            urls.append(next_week)
 
     def __extract_bookings(self, url):
         """
@@ -66,3 +93,6 @@ class BookingScraper:
                                          time(hour=int(end_time[:2]), minute=int(end_time[-2:])))
 
         return {"name": name, "start datetime": start_date_time, "end datetime": end_date_time}
+
+
+test = BookingScraper()
