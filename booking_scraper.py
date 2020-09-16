@@ -19,7 +19,7 @@ class BookingScraper:
         booking_sites = self.__get_individual_booking_html()
 
         for booking_site in booking_sites:
-            bookings.append(self.__extract_bookings(booking_site))
+            bookings += self.__extract_bookings(booking_site)
 
         return bookings
 
