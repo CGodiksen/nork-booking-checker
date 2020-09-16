@@ -5,9 +5,19 @@ from datetime import datetime, date, time
 
 
 class BookingScraper:
+    def __init__(self):
+        # The main url for the booking site used to find the url for each individual fitness room booking site.
+        self.booking_url = "http://nork.dk/booking/"
+
     def get_bookings(self):
         """
         Scrapes two weeks of data from each of the four booking sites for the fitness room and updates the bookings.
+        """
+
+    def get_individual_booking_urls(self):
+        """
+        Scrapes the main booking url to find the individual fitness room booking sites. Two URLs are returned for each
+        of the four fitness room booking sites to account for the current week and next week.
         """
 
     def __extract_bookings(self, url):
@@ -33,7 +43,7 @@ class BookingScraper:
         for count, day in enumerate(soup.find_all("td", attrs={"class": "noPad", "width": "14%", "valign": "top",
                                                                "bgcolor": "#E1E1E1", "align": "left"})):
             for booking in day.find_all("td", attrs={"style": "background-color: #F6B448 !important;"}):
-                print(self.__format_booking(booking.attrs["title"], count + 1, week, year))
+                bookings.append(self.__format_booking(booking.attrs["title"], count + 1, week, year))
 
     @staticmethod
     def __format_booking(title, day, week, year):
