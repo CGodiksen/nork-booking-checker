@@ -17,8 +17,17 @@ class BookingScraper:
 
     def get_bookings(self):
         """
-        Scrapes two weeks of data from each of the four booking sites for the fitness room and updates the bookings.
+        Scrapes two weeks of data from each of the four booking sites for the fitness room.
+
+        :return: A list of bookings where each booking is a dict with the keys [name, start datetime, end datetime].
         """
+        bookings = []
+        urls = self.__get_individual_booking_urls()
+
+        for url in urls:
+            bookings.append(self.__extract_bookings(url))
+
+        return bookings
 
     def __get_individual_booking_urls(self):
         """
@@ -46,6 +55,8 @@ class BookingScraper:
 
             urls.append(current_week)
             urls.append(next_week)
+
+        return urls
 
     def __extract_bookings(self, url):
         """
