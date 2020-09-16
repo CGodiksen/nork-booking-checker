@@ -9,12 +9,6 @@ class BookingScraper:
         # The main url for the booking site used to find the url for each individual fitness room booking site.
         self.booking_url = "http://nork.dk/booking/"
 
-        self.__get_individual_booking_urls()
-
-        self.__extract_bookings("https://www.conventus.dk/dataudv/www/booking.php?idv1=1&idv2=06:00&idv3=23:30&idv4=201"
-                                "21&idv5=10126&d=20&m=09&y=20&navn=skjul&ressourceliste=skjul&banebooking=skjul&login_"
-                                "boks=vis&handelsbetingelser=vis&engine_error=&alt_farver=skjul")
-
     def get_bookings(self):
         """
         Scrapes two weeks of data from each of the four booking sites for the fitness room.
@@ -36,25 +30,29 @@ class BookingScraper:
         """
         urls = []
 
-        request = requests.get(self.booking_url)
+        request = requests.get(self.booking_url,
+                               headers={"user-agent": "Mozilla/5.0 (Windows 10; rv:5.0) Gecko/20100101 Firefox/80.0.1"})
         html = request.text
 
         soup = BeautifulSoup(html, "html.parser")
 
         # Finding the URL for the current and next week for each of the four sites.
         for i in range(1, 5):
-            current_week = soup.find("a", text=re.compile("Fitness " + str(i)))["href"]
+            current_week_url = soup.find("a", text=re.compile("Fitness " + str(i)))["href"]
 
-            current_week_html = requests.get(current_week).text
+            current_week_html = requests.get(current_week_url).text
             current_week_soup = BeautifulSoup(current_week_html, "html.parser")
 
             # Finding the week so it can be used to find the "Next week" link.
             week = current_week_soup.find("span", class_="bt", text=re.compile("Uge")).contents[0][7:9]
 
-            next_week = current_week_soup.find("a", attrs={"title": "Næste uge - " + week})["href"]
+            next_week_url = current_week_soup.find("a", attrs={"title": "Næste uge - " + str(int(week) + 1)})["href"]
 
-            urls.append(current_week)
-            urls.append(next_week)
+            # Fixing the URL since the href only gives us the last part of the URL.
+            next_week_url = "https://www.conventus.dk/dataudv/www/" + next_week_url
+
+            urls.append(current_week_url)
+            urls.append(next_week_url)
 
         return urls
 
@@ -67,7 +65,8 @@ class BookingScraper:
         """
         bookings = []
 
-        request = requests.get(url)
+        request = requests.get(url,
+                               headers={"user-agent": "Mozilla/5.0 (Windows 10; rv:5.0) Gecko/20100101 Firefox/80.0.1"})
         html = request.text
 
         soup = BeautifulSoup(html, "html.parser")
@@ -104,6 +103,3 @@ class BookingScraper:
                                          time(hour=int(end_time[:2]), minute=int(end_time[-2:])))
 
         return {"name": name, "start datetime": start_date_time, "end datetime": end_date_time}
-
-
-test = BookingScraper()

@@ -14,7 +14,9 @@ class BookingChecker:
         self.booking_scraper = BookingScraper()
 
         # List of bookings, each booking represented by a tuple with the format (time_interval, name).
-        self.bookings = self.booking_scraper
+        self.bookings = self.booking_scraper.get_bookings()
+
+        print(self.bookings)
 
 
 test = BookingChecker("test")
