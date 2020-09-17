@@ -1,5 +1,5 @@
-import schedule
 from datetime import datetime
+
 from booking_scraper import BookingScraper
 from email_sender import EmailSender
 
@@ -20,7 +20,12 @@ class BookingChecker:
     def booking_checker_job(self):
         """Method that is called by the scheduler every 15 minutes to provide periodic checks to the booking system."""
         self.bookings = self.booking_scraper.get_bookings()
-        self.email_sender.send_conflict_email(self.__check_double_booking())
+
+        double_bookings = self.__check_double_booking()
+
+        # Notifying the user of the conflicts if any exist.
+        if double_bookings:
+            self.email_sender.send_conflict_email(self.__check_double_booking())
 
     def __check_double_booking(self):
         """
