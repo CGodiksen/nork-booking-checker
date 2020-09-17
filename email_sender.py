@@ -8,12 +8,13 @@ from email.mime.text import MIMEText
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 
 class EmailSender:
     def __init__(self):
         # If modifying these scopes, delete the file token.pickle.
-        self.SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+        self.SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
         self.service = None
         self.get_gmail_service()
@@ -30,8 +31,7 @@ class EmailSender:
             if credentials and credentials.expired and credentials.refresh_token:
                 credentials.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', self.SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', self.SCOPES)
                 credentials = flow.run_local_server(port=0)
             # Save the credentials for the next run.
             with open('token.pickle', 'wb') as token:
@@ -54,7 +54,9 @@ class EmailSender:
         message['from'] = sender
         message['subject'] = subject
 
-        return {'raw': base64.urlsafe_b64encode(message.as_string())}
+        b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
+        b64_string = b64_bytes.decode()
+        return {'raw': b64_string}
 
     def send_message(self, user_id, message):
         """Send an email message.
@@ -64,12 +66,13 @@ class EmailSender:
         :return: Sent Message.
         """
         try:
-            message = (self. service.users().messages().send(userId=user_id, body=message)
-                       .execute())
+            message = (self.service.users().messages().send(userId=user_id, body=message).execute())
             print('Message Id: %s' % message['id'])
             return message
-        except errors.HttpError as error:
+        except HttpError as error:
             print('An error occurred: %s' % error)
 
 
 test = EmailSender()
+test.send_message("me", test.create_message("christian.programming55@gmail.com", "christian.godiksen55@gmail.com",
+                                            "Test subject", "Test message"))
