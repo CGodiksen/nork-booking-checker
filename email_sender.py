@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import json
 import base64
 import os.path
 import pickle
@@ -12,13 +13,10 @@ from googleapiclient.errors import HttpError
 
 
 class EmailSender:
-    def __init__(self, sender, receiver):
-        """
-        :param sender: Email address of the sender.
-        :param receiver: Email address of the receiver.
-        """
-        self.sender = sender
-        self.receiver = receiver
+    def __init__(self):
+        self.sender = None
+        self.receiver = None
+        self.__get_sender_receiver()
 
         # If modifying these scopes, delete the file token.pickle.
         self.SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
@@ -44,7 +42,16 @@ class EmailSender:
 
         self.__send_message("me", self.__create_message(subject, message_text))
 
+    def __get_sender_receiver(self):
+        """Updates the "sender" and "receiver" class attributes with the emails specified in the "email_config" file."""
+        with open("email_config.json") as email_config:
+            email_dict = json.load(email_config)
+
+            self.sender = email_dict["sender"]
+            self.receiver = email_dict["receiver"]
+
     def __get_gmail_service(self):
+        """Updates the "service" class attribute that is used to access the Gmail API."""
         credentials = None
         # The file token.pickle stores the user's access and refresh tokens, and is created automatically when the
         # authorization flow completes for the first time.
