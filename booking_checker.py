@@ -17,6 +17,9 @@ class BookingChecker:
         # List of bookings, each booking represented by a tuple with the format (time_interval, name).
         self.bookings = None
 
+        # List used to keep track of previous conflicts to avoid sending multiple emails about the same conflict.
+        self.previous_conflicts = []
+
     def booking_checker_job(self):
         """Method that is called by the scheduler every 15 minutes to provide periodic checks to the booking system."""
         self.bookings = self.booking_scraper.get_bookings()
@@ -25,7 +28,7 @@ class BookingChecker:
 
         # Notifying the user of the conflicts if any exist.
         if double_bookings:
-            self.email_sender.send_conflict_email(self.__check_double_booking())
+            self.email_sender.send_conflict_email(double_bookings)
 
     def __check_double_booking(self):
         """
@@ -43,10 +46,15 @@ class BookingChecker:
         # Checking each booking for conflicts that would result in a double booking.
         for name_booking in name_bookings:
             for booking in self.bookings:
-                if booking["name"] != self.name:
-                    start_conflict = booking["start_datetime"] <= name_booking["start_datetime"] < booking["end_datetime"]
-                    end_conflict = booking["start_datetime"] < name_booking["end_datetime"] <= booking["end_datetime"]
-                    if start_conflict or end_conflict:
-                        double_bookings.append((name_booking, booking))
+                if booking not in self.previous_conflicts:
+                    if booking["name"] != self.name:
+                        start_conflict = booking["start_datetime"] <= name_booking["start_datetime"] < \
+                                         booking["end_datetime"]
+                        end_conflict = booking["start_datetime"] < name_booking["end_datetime"] <= \
+                                       booking["end_datetime"]
+                        if start_conflict or end_conflict:
+                            double_bookings.append((name_booking, booking))
+
+                            self.previous_conflicts.append(booking)
 
         return double_bookings
