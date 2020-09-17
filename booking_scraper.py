@@ -13,7 +13,7 @@ class BookingScraper:
         """
         Scrapes two weeks of data from each of the four booking sites for the fitness room.
 
-        :return: A list of bookings where each booking is a dict with the keys [name, start datetime, end datetime].
+        :return: A list of bookings where each booking is a dict with the keys [name, start_datetime, end_datetime].
         """
         bookings = []
         booking_sites = self.__get_individual_booking_html()
@@ -82,7 +82,7 @@ class BookingScraper:
     @staticmethod
     def __format_booking(title, day, week, year):
         """
-        Formats the given information into a dictionary with the keys [name, start datetime, end datetime].
+        Formats the given information into a dictionary with the keys [name, start_datetime, end_datetime].
 
         :param title: The html title of the table element showing a single booking.
         :param day: The week day number as an integer.
@@ -99,4 +99,4 @@ class BookingScraper:
         end_date_time = datetime.combine(date.fromisocalendar(year=year, week=week, day=day),
                                          time(hour=int(end_time[:2]), minute=int(end_time[-2:])))
 
-        return {"name": name, "start datetime": start_date_time, "end datetime": end_date_time}
+        return {"name": name, "start_datetime": start_date_time, "end_datetime": end_date_time}
