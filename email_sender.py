@@ -12,14 +12,24 @@ from googleapiclient.errors import HttpError
 
 
 class EmailSender:
-    def __init__(self):
+    def __init__(self, sender, receiver):
+        """
+        :param sender: Email address of the sender.
+        :param receiver: Email address of the receiver.
+        """
+        self.sender = sender
+        self.receiver = receiver
+
         # If modifying these scopes, delete the file token.pickle.
         self.SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
         self.service = None
-        self.get_gmail_service()
+        self.__get_gmail_service()
 
-    def get_gmail_service(self):
+    def send_conflict_email(self, double_bookings):
+        """Creates and sends an email to the specified receiver notifying them about one or more double bookings."""
+
+    def __get_gmail_service(self):
         credentials = None
         # The file token.pickle stores the user's access and refresh tokens, and is created automatically when the
         # authorization flow completes for the first time.
@@ -39,26 +49,23 @@ class EmailSender:
 
         self.service = build('gmail', 'v1', credentials=credentials)
 
-    @staticmethod
-    def create_message(sender, to, subject, message_text):
+    def __create_message(self, subject, message_text):
         """Create a message for an email.
 
-        :param sender: Email address of the sender.
-        :param to: Email address of the receiver.
         :param subject: The subject of the email message.
         :param message_text: The text of the email message.
         :return: An object containing a base64url encoded email object.
         """
         message = MIMEText(message_text)
-        message['to'] = to
-        message['from'] = sender
+        message['to'] = self.receiver
+        message['from'] = self.sender
         message['subject'] = subject
 
         b64_bytes = base64.urlsafe_b64encode(message.as_bytes())
         b64_string = b64_bytes.decode()
         return {'raw': b64_string}
 
-    def send_message(self, user_id, message):
+    def __send_message(self, user_id, message):
         """Send an email message.
 
         :param user_id: User's email address. The special value "me" can be used to indicate the authenticated user.
@@ -72,7 +79,3 @@ class EmailSender:
         except HttpError as error:
             print('An error occurred: %s' % error)
 
-
-test = EmailSender()
-test.send_message("me", test.create_message("***REMOVED***", "***REMOVED***",
-                                            "Test subject", "Test message"))
