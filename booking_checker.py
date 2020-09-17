@@ -12,7 +12,7 @@ class BookingChecker:
         self.name = name
 
         self.booking_scraper = BookingScraper()
-        self.email_sender = EmailSender("***REMOVED***", "***REMOVED***")
+        self.email_sender = EmailSender("christian.programming55@gmail.com", "christian.godiksen55@gmail.com")
 
         # List of bookings, each booking represented by a tuple with the format (time_interval, name).
         self.bookings = None
