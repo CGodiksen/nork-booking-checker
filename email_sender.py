@@ -28,15 +28,19 @@ class EmailSender:
 
     def send_conflict_email(self, double_bookings):
         """Creates and sends an email to the specified receiver notifying them about one or more double bookings."""
-        subject = "The fitness room has been double booked."
-        message_text = "The following bookings have conflicts:\n"
+        subject = "The fitness room has been double booked"
+        message_text = "The following bookings have conflicts:"
 
-        for double_booking in double_bookings:
-            user = double_booking[0]
-            conflicting_person = double_booking[1]
-            message_text += user["name"] + " - " + user["start_datetime"] + "-" + user["end_datetime"] + \
-                            " conflicts with " + conflicting_person["name"] + " - " + \
-                            conflicting_person["start_datetime"] + "-" + conflicting_person["end_datetime"]
+        for counter, double_booking in enumerate(double_bookings):
+            user_booking = double_booking[0]["name"] + " - " + \
+                           double_booking[0]["start_datetime"].strftime("%d/%m %H:%M") + "-" + \
+                           double_booking[0]["end_datetime"].strftime("%H:%M")
+
+            conflicting_person = double_booking[1]["name"] + " - " + \
+                                 double_booking[1]["start_datetime"].strftime("%d/%m %H:%M") + "-" + \
+                                 double_booking[1]["end_datetime"].strftime("%H:%M")
+
+            message_text += "<br>" + str(counter + 1) + ". " + user_booking + " conflicts with " + conflicting_person
 
         self.__send_message("me", self.__create_message(subject, message_text))
 
@@ -67,7 +71,7 @@ class EmailSender:
         :param message_text: The text of the email message.
         :return: An object containing a base64url encoded email object.
         """
-        message = MIMEText(message_text)
+        message = MIMEText(message_text, "html")
         message['to'] = self.receiver
         message['from'] = self.sender
         message['subject'] = subject

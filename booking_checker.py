@@ -1,5 +1,6 @@
 from datetime import datetime
 from booking_scraper import BookingScraper
+from email_sender import EmailSender
 
 
 class BookingChecker:
@@ -10,13 +11,14 @@ class BookingChecker:
         self.name = name
 
         self.booking_scraper = BookingScraper()
+        self.email_sender = EmailSender("christian.programming55@gmail.com", "christian.godiksen55@gmail.com")
 
         # List of bookings, each booking represented by a tuple with the format (time_interval, name).
         self.bookings = self.booking_scraper.get_bookings()
 
         print(self.bookings)
 
-        print(self.__check_double_booking())
+        self.email_sender.send_conflict_email(self.__check_double_booking())
 
     def __check_double_booking(self):
         """
@@ -29,14 +31,14 @@ class BookingChecker:
 
         # Creating a list of the bookings made by the specified name that are not in the past.
         name_bookings = [booking for booking in self.bookings
-                         if booking["name"] == self.name and booking["end datetime"] >= datetime.now()]
+                         if booking["name"] == self.name and booking["end_datetime"] >= datetime.now()]
 
         # Checking each booking for conflicts that would result in a double booking.
         for name_booking in name_bookings:
             for booking in self.bookings:
                 if booking["name"] != self.name:
-                    start_conflict = booking["start datetime"] <= name_booking["start datetime"] < booking["end datetime"]
-                    end_conflict = booking["start datetime"] < name_booking["end datetime"] <= booking["end datetime"]
+                    start_conflict = booking["start_datetime"] <= name_booking["start_datetime"] < booking["end_datetime"]
+                    end_conflict = booking["start_datetime"] < name_booking["end_datetime"] <= booking["end_datetime"]
                     if start_conflict or end_conflict:
                         double_bookings.append((name_booking, booking))
 
