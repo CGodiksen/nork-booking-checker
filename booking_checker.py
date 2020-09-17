@@ -1,3 +1,4 @@
+import schedule
 from datetime import datetime
 from booking_scraper import BookingScraper
 from email_sender import EmailSender
@@ -14,10 +15,11 @@ class BookingChecker:
         self.email_sender = EmailSender("***REMOVED***", "***REMOVED***")
 
         # List of bookings, each booking represented by a tuple with the format (time_interval, name).
+        self.bookings = None
+
+    def booking_checker_job(self):
+        """Method that is called by the scheduler every 15 minutes to provide periodic checks to the booking system."""
         self.bookings = self.booking_scraper.get_bookings()
-
-        print(self.bookings)
-
         self.email_sender.send_conflict_email(self.__check_double_booking())
 
     def __check_double_booking(self):
@@ -43,6 +45,3 @@ class BookingChecker:
                         double_bookings.append((name_booking, booking))
 
         return double_bookings
-
-
-test = BookingChecker("***REMOVED***")
