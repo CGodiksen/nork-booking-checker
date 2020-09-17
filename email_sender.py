@@ -1,7 +1,9 @@
 from __future__ import print_function
 
+import base64
 import os.path
 import pickle
+from email.mime.text import MIMEText
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -37,16 +39,22 @@ class EmailSender:
 
         self.service = build('gmail', 'v1', credentials=credentials)
 
-        # Call the Gmail API
-        results = self.service.users().labels().list(userId='me').execute()
-        labels = results.get('labels', [])
+    @staticmethod
+    def create_message(sender, to, subject, message_text):
+        """Create a message for an email.
 
-        if not labels:
-            print('No labels found.')
-        else:
-            print('Labels:')
-            for label in labels:
-                print(label['name'])
+        :param sender: Email address of the sender.
+        :param to: Email address of the receiver.
+        :param subject: The subject of the email message.
+        :param message_text: The text of the email message.
+        :return: An object containing a base64url encoded email object.
+        """
+        message = MIMEText(message_text)
+        message['to'] = to
+        message['from'] = sender
+        message['subject'] = subject
+
+        return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
 
 test = EmailSender()
