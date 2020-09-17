@@ -28,6 +28,17 @@ class EmailSender:
 
     def send_conflict_email(self, double_bookings):
         """Creates and sends an email to the specified receiver notifying them about one or more double bookings."""
+        subject = "The fitness room has been double booked."
+        message_text = "The following bookings have conflicts:\n"
+
+        for double_booking in double_bookings:
+            user = double_booking[0]
+            conflicting_person = double_booking[1]
+            message_text += user["name"] + " - " + user["start_datetime"] + "-" + user["end_datetime"] + \
+                            " conflicts with " + conflicting_person["name"] + " - " + \
+                            conflicting_person["start_datetime"] + "-" + conflicting_person["end_datetime"]
+
+        self.__send_message("me", self.__create_message(subject, message_text))
 
     def __get_gmail_service(self):
         credentials = None
@@ -78,4 +89,3 @@ class EmailSender:
             return message
         except HttpError as error:
             print('An error occurred: %s' % error)
-
