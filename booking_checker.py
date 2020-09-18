@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from booking_scraper import BookingScraper
 from email_sender import EmailSender
@@ -41,7 +41,7 @@ class BookingChecker:
 
         # Creating a list of the bookings made by the specified name that are not in the past.
         name_bookings = [booking for booking in self.bookings
-                         if booking["name"] == self.name and booking["end_datetime"] >= datetime.now()]
+                         if booking["name"] == self.name and booking["end_datetime"] >= datetime.datetime.now()]
 
         # Checking each booking for conflicts that would result in a double booking.
         for name_booking in name_bookings:
