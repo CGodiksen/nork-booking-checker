@@ -16,12 +16,18 @@ class BookingScraper:
         :return: A list of bookings where each booking is a dict with the keys [name, start_datetime, end_datetime].
         """
         bookings = []
-        booking_sites = self.__get_individual_booking_html()
 
-        for booking_site in booking_sites:
-            bookings += self.__extract_bookings(booking_site)
+        # Handling connectivity errors.
+        try:
+            booking_sites = self.__get_individual_booking_html()
 
-        return bookings
+            for booking_site in booking_sites:
+                bookings += self.__extract_bookings(booking_site)
+
+            return bookings
+        except Exception as e:
+            print("get_bookings: " + str(e))
+            return []
 
     def __get_individual_booking_html(self):
         """
